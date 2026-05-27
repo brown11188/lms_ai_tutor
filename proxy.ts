@@ -18,8 +18,10 @@ export default auth((req) => {
   const pathname = nextUrl.pathname;
   const session = req.auth;
 
-  const pathnameWithoutLocale = pathname.replace(/^\/(vi|en)/, '') || '/';
-  const locale = pathname.match(/^\/(vi|en)/)?.[1] ?? 'vi';
+  const localeMatch = pathname.match(/^\/(vi|en)(\/.*)?$/);
+  const locale = localeMatch?.[1] ?? 'vi';
+  const pathAfterLocale = localeMatch?.[2] ?? '/';
+  const pathnameWithoutLocale = pathAfterLocale || '/';
 
   const isProtected = protectedRoutes.some(r => pathnameWithoutLocale.startsWith(r));
   const isAdmin = adminRoutes.some(r => pathnameWithoutLocale.startsWith(r));
