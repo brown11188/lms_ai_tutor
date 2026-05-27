@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "courses": "Course Library",
+    "manageCourses": "Manage Courses",
+    "manageUsers": "Manage Users",
+    "aiSupport": "AI Support",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to continue learning",
+    "registerTitle": "Create Account",
+    "registerSubtitle": "Start your learning journey",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginError": "Invalid email or password"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "continueLeaning": "Continue Learning",
+    "continueBtn": "Continue",
+    "enrolledCourses": "Enrolled Courses",
+    "completedLessons": "Completed Lessons",
+    "weeklyHours": "Weekly Hours",
+    "myCourses": "My Courses",
+    "noEnrollment": "You haven't enrolled in any courses yet",
+    "browseCourses": "Browse Courses"
+  },
+  "courses": {
+    "title": "Course Library",
+    "search": "Search courses...",
+    "allLevels": "All Levels",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "enroll": "Enroll",
+    "continue": "Continue",
+    "lessons": "lessons",
+    "parts": "parts",
+    "enrolled": "Enrolled",
+    "startLearning": "Start Learning",
+    "instructor": "Instructor"
+  },
+  "lesson": {
+    "prev": "Previous",
+    "next": "Next",
+    "quiz": "Quiz",
+    "assignment": "Assignment",
+    "content": "Content",
+    "completed": "Completed",
+    "submitQuiz": "Submit Quiz",
+    "submitAssignment": "Submit Assignment",
+    "yourAnswer": "Your answer..."
+  },
+  "ai": {
+    "title": "AI Support",
+    "placeholder": "Ask a question...",
+    "send": "Send",
+    "summarize": "Summarize Course",
+    "selectCourse": "Select a course to summarize",
+    "thinking": "Thinking..."
+  },
+  "admin": {
+    "courses": {
+      "title": "Manage Courses",
+      "new": "New Course",
+      "edit": "Edit",
+      "delete": "Delete",
+      "publish": "Publish",
+      "unpublish": "Unpublish"
+    },
+    "users": {
+      "title": "Manage Users",
+      "changeRole": "Change Role"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Success",
+    "confirmDelete": "Are you sure you want to delete?",
+    "noData": "No data available"
+  }
+}
