@@ -1,33 +1,14 @@
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { courses, enrollments } from '@/db/schema';
+import { courses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { redirect, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { BookOpen, Users, ChevronDown, Play } from 'lucide-react';
-
-async function enrollAction(courseId: number, locale: string, userId: number) {
-  'use server';
-  await db.insert(enrollments).values({ userId, courseId }).onConflictDoNothing();
-  const course = await db.query.courses.findFirst({
-    where: eq(courses.id, courseId),
-    with: {
-      parts: {
-        with: { lessons: true },
-        orderBy: (p, { asc }) => [asc(p.order)],
-      },
-    },
-  });
-  const firstLesson = course?.parts[0]?.lessons.sort((a, b) => a.order - b.order)[0];
-  if (firstLesson) {
-    redirect(`/${locale}/courses/${courseId}/learn/${firstLesson.id}`);
-  } else {
-    redirect(`/${locale}/courses/${courseId}`);
-  }
-}
+import { EnrollButton } from '@/features/course/EnrollButton';
 
 export default async function CourseDetailPage({
   params,
@@ -77,8 +58,6 @@ export default async function CourseDetailPage({
         : 'bg-rose-100 text-rose-700';
 
   const firstLesson = allLessons[0];
-
-  const enrollWithData = enrollAction.bind(null, courseId, locale, userId ?? 0);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -140,14 +119,11 @@ export default async function CourseDetailPage({
                 </Link>
               ) : null
             ) : userId ? (
-              <form action={enrollWithData}>
-                <button
-                  type="submit"
-                  className={cn(buttonVariants(), 'bg-indigo-600 hover:bg-indigo-500')}
-                >
-                  {t('enroll')}
-                </button>
-              </form>
+              <EnrollButton
+                courseId={course.id}
+                locale={locale}
+                firstLessonId={firstLesson?.id ?? null}
+              />
             ) : (
               <Link
                 href={`/${locale}/login`}
