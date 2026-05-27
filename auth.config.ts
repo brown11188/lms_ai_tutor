@@ -8,12 +8,14 @@ export const authConfig = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.role = (user as { role: string }).role;
         token.locale = (user as { locale: string }).locale;
       }
       return token;
     },
     session({ session, token }) {
+      if (token.sub) session.user.id = token.sub;
       session.user.role = token.role as string;
       session.user.locale = token.locale as string;
       return session;

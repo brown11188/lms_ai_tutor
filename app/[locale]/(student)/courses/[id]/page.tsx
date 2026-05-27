@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { BookOpen, Users, ChevronDown, Play } from 'lucide-react';
+import { BookOpen, Users, ChevronDown, Play, Lock } from 'lucide-react';
 import { EnrollButton } from '@/features/course/EnrollButton';
 
 export default async function CourseDetailPage({
@@ -167,15 +167,28 @@ export default async function CourseDetailPage({
                     const mins = lesson.durationSec > 0
                       ? `${Math.floor(lesson.durationSec / 60)}:${String(lesson.durationSec % 60).padStart(2, '0')}`
                       : null;
+                    const lessonHref = `/${locale}/courses/${course.id}/learn/${lesson.id}`;
                     return (
-                      <li
-                        key={lesson.id}
-                        className="flex items-center gap-3 px-5 py-2.5 text-sm"
-                      >
-                        <Play size={13} className="text-indigo-400 shrink-0" />
-                        <span className="flex-1 text-slate-700">{lessonTitle}</span>
-                        {mins && (
-                          <span className="text-xs text-slate-400 shrink-0">{mins}</span>
+                      <li key={lesson.id}>
+                        {isEnrolled ? (
+                          <Link
+                            href={lessonHref}
+                            className="flex items-center gap-3 px-5 py-2.5 text-sm hover:bg-indigo-50 transition-colors group"
+                          >
+                            <Play size={13} className="text-indigo-400 shrink-0 group-hover:text-indigo-600" />
+                            <span className="flex-1 text-slate-700 group-hover:text-indigo-700">{lessonTitle}</span>
+                            {mins && (
+                              <span className="text-xs text-slate-400 shrink-0">{mins}</span>
+                            )}
+                          </Link>
+                        ) : (
+                          <div className="flex items-center gap-3 px-5 py-2.5 text-sm opacity-60 cursor-default">
+                            <Lock size={13} className="text-slate-400 shrink-0" />
+                            <span className="flex-1 text-slate-500">{lessonTitle}</span>
+                            {mins && (
+                              <span className="text-xs text-slate-400 shrink-0">{mins}</span>
+                            )}
+                          </div>
                         )}
                       </li>
                     );
