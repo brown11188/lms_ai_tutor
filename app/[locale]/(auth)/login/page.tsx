@@ -8,11 +8,16 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Bot, Loader2 } from 'lucide-react';
+import { Bot, Loader2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+
+const DEMO_ACCOUNTS = [
+  { label: 'Admin', email: 'admin@lms.local', password: 'Admin@123' },
+  { label: 'Student', email: 'student1@lms.local', password: 'Student@123' },
+];
 
 const schema = z.object({
   email: z.string().email(),
@@ -27,11 +32,12 @@ export default function LoginPage() {
   const locale = params.locale as string;
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: { email: 'admin@lms.local', password: 'Admin@123' },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const doSignIn = async (data: FormData) => {
     setLoading(true);
     const res = await signIn('credentials', { ...data, redirect: false });
     setLoading(false);
@@ -43,9 +49,20 @@ export default function LoginPage() {
     }
   };
 
+  const quickLogin = async (email: string, password: string) => {
+    setLoading(true);
+    const res = await signIn('credentials', { email, password, redirect: false });
+    setLoading(false);
+    if (res?.error) {
+      toast.error(t('loginError'));
+    } else {
+      router.push(`/${locale}/dashboard`);
+      router.refresh();
+    }
+  };
+
   return (
     <div className="w-full max-w-sm">
-      {/* Card */}
       <div className="rounded-2xl p-8"
         style={{
           background: 'rgba(15,23,42,0.8)',
@@ -55,7 +72,7 @@ export default function LoginPage() {
         }}
       >
         {/* Logo */}
-        <div className="mb-8 flex flex-col items-center gap-3">
+        <div className="mb-6 flex flex-col items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 0 24px rgba(99,102,241,0.5)' }}
           >
@@ -67,13 +84,41 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {/* Demo quick-login */}
+        <div className="mb-5 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-indigo-400">
+            <Zap size={12} /> Demo — đăng nhập nhanh
+          </p>
+          <div className="flex gap-2">
+            {DEMO_ACCOUNTS.map(acc => (
+              <button
+                key={acc.email}
+                type="button"
+                disabled={loading}
+                onClick={() => quickLogin(acc.email, acc.password)}
+                className="flex-1 rounded-lg border border-indigo-500/30 bg-indigo-600/20 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-600/40 disabled:opacity-50"
+              >
+                {loading ? <Loader2 size={12} className="animate-spin mx-auto" /> : acc.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative mb-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-700" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-slate-900 px-2 text-xs text-slate-500">hoặc đăng nhập thủ công</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit(doSignIn)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email" className="text-sm text-slate-300">{t('email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
               autoComplete="email"
               {...register('email')}
               className="border-slate-700 bg-slate-800/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-500"
@@ -86,7 +131,6 @@ export default function LoginPage() {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
               autoComplete="current-password"
               {...register('password')}
               className="border-slate-700 bg-slate-800/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-500"
@@ -97,13 +141,13 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="mt-2 h-10 w-full bg-indigo-600 font-semibold text-white hover:bg-indigo-500 focus-visible:ring-indigo-500"
+            className="mt-1 h-10 w-full bg-indigo-600 font-semibold text-white hover:bg-indigo-500"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : t('login')}
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-5 text-center text-sm text-slate-500">
           {t('noAccount')}{' '}
           <Link href={`/${locale}/register`} className="font-medium text-indigo-400 hover:text-indigo-300">
             {t('register')}
