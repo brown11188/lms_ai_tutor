@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8f9fb;
+  --foreground: #0d1426;
+
+  /* Brand palette */
+  --orange-50:  #fff7ed;
+  --orange-100: #ffedd5;
+  --orange-500: #f97316;
+  --orange-600: #ea6c0a;
+
+  /* Navy palette (sidebar / hero sections) */
+  --navy-950: #060c18;
+  --navy-900: #0a1220;
+  --navy-800: #0f1c30;
+  --navy-700: #162540;
+  --navy-600: #1e3050;
+
+  /* Surfaces */
+  --surface-card: #ffffff;
+  --surface-muted: #f1f4f8;
+  --border-light: #e2e8f0;
+  --border-muted: rgba(0,0,0,0.06);
+
+  /* Text */
+  --text-primary: #0d1426;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ─── Base ─── */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ─── Card hover lift ─── */
+.card-hover {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(249,115,22,0.12), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* ─── Progress bar (orange override) ─── */
+.progress-orange [data-slot="progress-indicator"] {
+  background: #f97316;
+}
+
+/* ─── Orange gradient text ─── */
+.text-gradient-orange {
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

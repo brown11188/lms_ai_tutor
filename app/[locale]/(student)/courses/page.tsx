@@ -1,11 +1,10 @@
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { courses, enrollments } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { Users, BookOpen } from 'lucide-react';
+import { Users, BookOpen, Star, CheckCircle2 } from 'lucide-react';
 import { Suspense } from 'react';
 import { CourseSearch } from '@/features/course/CourseSearch';
 
@@ -29,9 +28,7 @@ export default async function CoursesPage({
     where: eq(courses.published, true),
     with: {
       instructor: true,
-      parts: {
-        with: { lessons: true },
-      },
+      parts: { with: { lessons: true } },
       enrollments: true,
     },
   });
@@ -49,110 +46,136 @@ export default async function CoursesPage({
     const title = locale === 'en' ? (course.titleEn ?? course.title) : course.title;
     const desc =
       locale === 'en' ? (course.descriptionEn ?? course.description) : course.description;
-
     const matchesQ = q
       ? title.toLowerCase().includes(q.toLowerCase()) ||
         desc.toLowerCase().includes(q.toLowerCase())
       : true;
-
     const matchesLevel = level && level !== 'all' ? course.level === level : true;
-
     return matchesQ && matchesLevel;
   });
 
-  const levelBadgeColor = (lv: string) => {
-    if (lv === 'beginner') return 'bg-emerald-100 text-emerald-700';
-    if (lv === 'intermediate') return 'bg-amber-100 text-amber-700';
-    return 'bg-rose-100 text-rose-700';
+  const levelLabel = (lv: string) => {
+    if (lv === 'beginner') return { label: t('beginner'), cls: 'bg-emerald-100 text-emerald-700' };
+    if (lv === 'intermediate') return { label: t('intermediate'), cls: 'bg-orange-100 text-orange-700' };
+    return { label: t('advanced'), cls: 'bg-rose-100 text-rose-700' };
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
-        <p className="text-sm text-slate-500">
-          {filtered.length} {filtered.length === 1 ? 'course' : 'courses'}
-        </p>
+    <div className="min-h-full">
+      {/* Page header */}
+      <div
+        className="px-6 py-8"
+        style={{
+          background: 'linear-gradient(135deg, #060c18 0%, #0f1c30 100%)',
+        }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-2xl font-bold text-white mb-1">{t('title')}</h1>
+          <p className="text-slate-400 text-sm">
+            {filtered.length} {filtered.length === 1 ? 'course' : 'courses'} available
+          </p>
+        </div>
       </div>
 
-      <Suspense>
-        <CourseSearch locale={locale} />
-      </Suspense>
-
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-300 py-16 text-slate-400">
-          <BookOpen size={32} />
-          <p>{t('search')}</p>
+      {/* Search bar */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-6xl mx-auto">
+          <Suspense>
+            <CourseSearch locale={locale} />
+          </Suspense>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((course) => {
-            const title = locale === 'en' ? (course.titleEn ?? course.title) : course.title;
-            const description =
-              locale === 'en'
-                ? (course.descriptionEn ?? course.description)
-                : course.description;
-            const lessonCount = course.parts.flatMap((p) => p.lessons).length;
-            const enrolledCount = course.enrollments.length;
-            const isEnrolled = userEnrollmentIds.includes(course.id);
+      </div>
 
-            return (
-              <Link
-                key={course.id}
-                href={`/${locale}/courses/${course.id}`}
-                className="group flex flex-col rounded-xl overflow-hidden border border-slate-200 bg-white hover:border-indigo-200 hover:shadow-md transition-all"
-              >
-                {course.thumbnail ? (
-                  <img
-                    src={course.thumbnail}
-                    alt={title}
-                    className="w-full h-40 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                    <BookOpen size={40} className="text-white/70" />
-                  </div>
-                )}
+      {/* Course grid */}
+      <div className="p-6 max-w-6xl mx-auto">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-slate-200 py-20 text-slate-400 mt-4">
+            <BookOpen size={36} className="text-slate-300" />
+            <p className="text-sm font-medium">{t('search')}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-2">
+            {filtered.map((course) => {
+              const title = locale === 'en' ? (course.titleEn ?? course.title) : course.title;
+              const description =
+                locale === 'en'
+                  ? (course.descriptionEn ?? course.description)
+                  : course.description;
+              const lessonCount = course.parts.flatMap((p) => p.lessons).length;
+              const enrolledCount = course.enrollments.length;
+              const isEnrolled = userEnrollmentIds.includes(course.id);
+              const { label: lvLabel, cls: lvCls } = levelLabel(course.level);
 
-                <div className="flex flex-col flex-1 p-4 gap-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="font-semibold text-slate-800 leading-snug line-clamp-2 group-hover:text-indigo-700 transition-colors">
-                      {title}
-                    </h2>
+              return (
+                <Link
+                  key={course.id}
+                  href={`/${locale}/courses/${course.id}`}
+                  className="card-hover group flex flex-col rounded-xl overflow-hidden bg-white border border-slate-200 hover:border-orange-300"
+                  style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+                >
+                  {/* Thumbnail */}
+                  <div className="relative overflow-hidden h-44">
+                    {course.thumbnail ? (
+                      <img
+                        src={course.thumbnail}
+                        alt={title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #0f1c30, #1e3050)' }}
+                      >
+                        <BookOpen size={40} className="text-white/30" />
+                      </div>
+                    )}
+                    {/* Orange top border on hover */}
+                    <div
+                      className="absolute top-0 inset-x-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      style={{ background: 'linear-gradient(90deg, #f97316, #fb923c)' }}
+                    />
                     {isEnrolled && (
-                      <span className="shrink-0 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow">
+                        <CheckCircle2 size={11} />
                         {t('enrolled')}
-                      </span>
+                      </div>
                     )}
                   </div>
 
-                  <p className="text-sm text-slate-500 line-clamp-2">{description}</p>
+                  {/* Card body */}
+                  <div className="flex flex-col flex-1 p-4 gap-2.5">
+                    <span className={`self-start inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${lvCls}`}>
+                      {lvLabel}
+                    </span>
 
-                  <div className="flex items-center gap-2 flex-wrap mt-auto">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${levelBadgeColor(course.level)}`}
-                    >
-                      {t(course.level)}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-slate-500">
-                      <BookOpen size={12} />
-                      {lessonCount} {t('lessons')}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-slate-500">
-                      <Users size={12} />
-                      {enrolledCount}
-                    </span>
-                  </div>
+                    <h2 className="font-bold text-slate-800 leading-snug line-clamp-2 text-[15px] group-hover:text-orange-600 transition-colors">
+                      {title}
+                    </h2>
 
-                  <div className="text-xs text-slate-400">
-                    {t('instructor')}: {course.instructor.name}
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      {description}
+                    </p>
+
+                    <div className="flex items-center gap-3 mt-auto pt-2 border-t border-slate-100">
+                      <span className="flex items-center gap-1 text-xs text-slate-500">
+                        <BookOpen size={12} className="text-slate-400" />
+                        {lessonCount} {t('lessons')}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-slate-500">
+                        <Users size={12} className="text-slate-400" />
+                        {enrolledCount}
+                      </span>
+                      <span className="ml-auto text-xs text-slate-400 truncate">
+                        {course.instructor.name}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

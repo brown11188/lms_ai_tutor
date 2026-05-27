@@ -1,13 +1,18 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { SessionProvider } from 'next-auth/react';
-import { Geist } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist' });
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 export default async function LocaleLayout({
   children,
@@ -22,7 +27,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${geist.variable} h-full`}>
+    <html lang={locale} className={`${jakarta.variable} h-full`}>
       <body className="h-full bg-background font-sans antialiased">
         <SessionProvider>
           <NextIntlClientProvider messages={messages}>

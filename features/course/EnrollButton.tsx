@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2, Play } from 'lucide-react';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type Props = {
@@ -46,9 +44,17 @@ export function EnrollButton({ courseId, locale, firstLessonId }: Props) {
     <button
       onClick={handleEnroll}
       disabled={loading}
-      className={cn(buttonVariants(), 'bg-indigo-600 hover:bg-indigo-500 disabled:opacity-70')}
+      className="inline-flex items-center gap-2 px-6 h-11 rounded-lg text-sm font-semibold text-white transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+      style={{
+        background: 'linear-gradient(135deg, #f97316, #ea6c0a)',
+        boxShadow: '0 4px 14px rgba(249,115,22,0.35)',
+      }}
     >
-      {loading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
+      {loading ? (
+        <Loader2 size={16} className="animate-spin" />
+      ) : (
+        <Play size={16} fill="currentColor" />
+      )}
       {loading ? 'Đang xử lý...' : t('enroll')}
     </button>
   );
