@@ -1,44 +1,44 @@
-import { auth } from '@/auth';
+import NextAuth from 'next-auth';
+import { authConfig } from './auth.config';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Use edge-safe config — no pg/bcrypt imported here
+const { auth } = NextAuth(authConfig);
 const intlMiddleware = createMiddleware(routing);
 
 const protectedRoutes = ['/dashboard', '/courses', '/ai', '/profile'];
 const adminRoutes = ['/admin'];
 const authRoutes = ['/login', '/register'];
 
-export default async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export default auth((req) => {
+  const { nextUrl } = req;
+  const pathname = nextUrl.pathname;
+  const session = req.auth;
 
-  // Strip locale prefix to check path
   const pathnameWithoutLocale = pathname.replace(/^\/(vi|en)/, '') || '/';
-
-  const session = await auth();
+  const locale = pathname.match(/^\/(vi|en)/)?.[1] ?? 'vi';
 
   const isProtected = protectedRoutes.some(r => pathnameWithoutLocale.startsWith(r));
   const isAdmin = adminRoutes.some(r => pathnameWithoutLocale.startsWith(r));
   const isAuth = authRoutes.some(r => pathnameWithoutLocale.startsWith(r));
 
   if ((isProtected || isAdmin) && !session) {
-    const locale = pathname.match(/^\/(vi|en)/)?.[1] ?? 'vi';
-    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/login`, req.url));
   }
 
   if (isAdmin && session?.user.role !== 'ADMIN') {
-    const locale = pathname.match(/^\/(vi|en)/)?.[1] ?? 'vi';
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url));
   }
 
   if (isAuth && session) {
-    const locale = pathname.match(/^\/(vi|en)/)?.[1] ?? 'vi';
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url));
   }
 
-  return intlMiddleware(request);
-}
+  return intlMiddleware(req as unknown as NextRequest);
+});
 
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],

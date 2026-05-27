@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { authConfig } from './auth.config';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -12,6 +13,7 @@ const loginSchema = z.object({
 });
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -35,23 +37,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.role = (user as { role: string }).role;
-        token.locale = (user as { locale: string }).locale;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      session.user.role = token.role as string;
-      session.user.locale = token.locale as string;
-      return session;
-    },
-  },
-  pages: {
-    signIn: '/login',
-  },
 });
 
 declare module 'next-auth' {
@@ -69,4 +54,3 @@ declare module 'next-auth' {
     };
   }
 }
-
